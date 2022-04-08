@@ -26,7 +26,7 @@ from supervisor import ticks_ms
 
 try:
     # Only used for typing
-    from typing import Tuple, Optional, Union, Iterable, Set
+    from typing import Tuple, Optional, Iterable, Set
     from microcontroller import Pin
 except ImportError:
     pass
@@ -108,11 +108,11 @@ class EventQueue:
         and return False.
         Note: in python this does not optimize to avoid allocating.
         """
-        ev = self.get()
-        if ev:
-            event.key_number = ev.key_number
-            event.timestamp = ev.timestamp
-            event.pressed = ev.pressed
+        next_event = self.get()
+        if next_event:
+            event.key_number = next_event.key_number
+            event.timestamp = next_event.timestamp
+            event.pressed = next_event.pressed
             return True
         return False
 
@@ -176,6 +176,7 @@ class McpMatrixScanner:
 
     @property
     def key_count(self) -> int:
+        """The number of keys in the scanner."""
         return self._key_count
 
     def _scan_matrix(self) -> Set[int]:
@@ -245,6 +246,6 @@ class McpMatrixScanner:
         """No-op used by Context Managers."""
         return self
 
-    def __exit__(self) -> None:
+    def __exit__(self, _, _, _) -> None:
         """Automatically deinitializes when exiting a context."""
         self.deinit()

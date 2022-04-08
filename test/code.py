@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2017 Scott Shawcroft, written for Adafruit Industries
+# SPDX-FileCopyrightText: Copyright (c) 2022 Neradoc
+#
+# SPDX-License-Identifier: Unlicense
+
 import board
 from adafruit_mcp230xx.mcp23017 import MCP23017
 from mcp23017_scanner import McpMatrixScanner
