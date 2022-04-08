@@ -14,25 +14,22 @@ Scan a matrix keyboard with an API modelled after the keypad module
 Implementation Notes
 --------------------
 
-**Hardware:**
-
-.. todo:: Add links to any specific hardware product page(s), or category page(s).
-  Use unordered list & hyperlink rST inline format: "* `Link Text <url>`_"
-
 **Software and Dependencies:**
 
 * Adafruit CircuitPython firmware for the supported boards:
   https://circuitpython.org/downloads
 
-.. todo:: Uncomment or remove the Bus Device and/or the Register library dependencies
-  based on the library's use of either.
-
-# * Adafruit's Bus Device library: https://github.com/adafruit/Adafruit_CircuitPython_BusDevice
-# * Adafruit's Register library: https://github.com/adafruit/Adafruit_CircuitPython_Register
 """
 
 from digitalio import DigitalInOut, Pull
 from supervisor import ticks_ms
+
+try:
+    # Only used for typing
+    from typing import Tuple, Optional, Union, Iterable, Set
+    from microcontroller import Pin
+except ImportError:
+    pass
 
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/Neradoc/CircuitPython_mcp23017_scanner.git"
@@ -47,7 +44,7 @@ class Event:
                           `supervisor.ticks_ms` time system.  If specified as None,
                           the current value of `supervisor.ticks_ms` is used.
     """
-    def __init__(self, key, pressed, timestamp=None):
+    def __init__(self, key: int, pressed: bool, timestamp: int=None):
         self.key_number = key
         """The key number."""
         self.timestamp = timestamp or ticks_ms()
@@ -57,12 +54,12 @@ class Event:
         The opposite of released."""
 
     @property
-    def released(self):
+    def released(self) -> bool:
         """True if the event represents a key up (released) transition.
         The opposite of pressed."""
         return not self.pressed
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         """Two Event objects are equal if their key_number and pressed/released values
         are equal. Note that this does not compare the event timestamps."""
         return (
@@ -70,7 +67,7 @@ class Event:
             and self.pressed == other.pressed
         )
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Returns a hash for the Event, so it can be used in dictionaries, etc..
         Note that as events with different timestamps compare equal,
         they also hash to the same value."""
@@ -81,15 +78,18 @@ class Event:
 
 
 class EventQueue:
+    """
+    A queue of Event objects, filled by a scanner.
+    """
     def __init__(self): # , max_events=64):
         self._outq = []
         self._inq = []
 
-    def append(self, event):
+    def append(self, event: Event) -> None:
         """Append an event at the end of the queue"""
         self._inq.append(event)
 
-    def get(self):
+    def get(self) -> Event:
         """
         Return the next key transition event.
         Return None if no events are pending.
@@ -104,7 +104,7 @@ class EventQueue:
             return self._outq.pop()
         return None
 
-    def get_into(self, event):
+    def get_into(self, event: Event) -> bool:
         """
         Store the next key transition event in the supplied event, if available,
         and return True. If there are no queued events, do not touch event
@@ -119,19 +119,19 @@ class EventQueue:
             return True
         return False
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear any queued key transition events."""
         self._outq.clear()
         self._inq.clear()
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         """
         True if len() is greater than zero.
         This is an easy way to check if the queue is empty.
         """
         return len(self) > 0
 
-    def __len__(self):
+    def __len__(self) -> int:
         """
         Return the number of events currently in the queue.
         Used to implement len().
@@ -144,7 +144,7 @@ class McpMatrixScanner:
     Columns are on port A and inputs.
     Rows are on port B and outputs.
     """
-    def __init__(self, mcp, row_pins, column_pins, irq=None):
+    def __init__(self, mcp: any, row_pins: Iterable[int], column_pins: Iterable[int], irq: Optional[Pin]=None):
         self._key_count = len(column_pins) * len(row_pins)
         self.columns = column_pins
         self.rows = row_pins
@@ -171,10 +171,10 @@ class McpMatrixScanner:
             mcp.clear_ints()
 
     @property
-    def key_count(self):
+    def key_count(self) -> int:
         return self._key_count
 
-    def _scan_matrix(self):
+    def _scan_matrix(self) -> Set[int]:
         """Scan the matrix and return the list of keys down"""
         pressed = set()
         num_cols = len(self.columns)
@@ -193,7 +193,7 @@ class McpMatrixScanner:
         self.mcp.gpioa = 0xFF
         return pressed
 
-    def update_queue(self):
+    def update(self) -> None:
         """
         Run the scan and create events in the event queue.
         """
@@ -221,7 +221,7 @@ class McpMatrixScanner:
         """Convert row, column to key number"""
         return row * len(self.columns) + column
 
-    def reset(self):
+    def reset(self) -> None:
         """
         Reset the internal state of the scanner to assume that all keys are now
         released. Any key that is already pressed at the time of this call will
@@ -230,18 +230,18 @@ class McpMatrixScanner:
         self.events.clear()
         self.keys_state.clear()
 
-    def deinit(self):
+    def deinit(self) -> None:
         """Release the IRQ pin"""
         if self.irq:
             self.irq.deinit()
             self.irq = None
         # TODO: reset the mcp configuration
 
-    def __enter__(self):
+    def __enter__(self) -> "McpMatrixScanner":
         """No-op used by Context Managers."""
         return self
 
-    def __exit__(self):
+    def __exit__(self) -> None:
         """Automatically deinitializes when exiting a context."""
         self.deinit()
 
