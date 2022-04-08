@@ -14,7 +14,7 @@ scanner = McpMatrixScanner(mcp, ROWS, COLUMNS, irq=board.D5) # irq is optional
 while True:
 	t0 = ticks_ms()
 	scanner.update_queue()
-	while event := scanner.pop_next_event():
+	while event := scanner.events.get():
 		key = scanner.key_number_to_row_column(event.key_number)
 		if event.pressed:
 			print(f"Key pressed : {key}")
