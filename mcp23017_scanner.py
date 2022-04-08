@@ -1,9 +1,41 @@
+# SPDX-FileCopyrightText: 2017 Scott Shawcroft, written for Adafruit Industries
+# SPDX-FileCopyrightText: Copyright (c) 2022 Neradoc
+#
+# SPDX-License-Identifier: MIT
 """
-MCP23017, I2C GPIO expander
-connected to a Neokey5x6 (matrix keypad)
+`mcp23017_scanner`
+================================================================================
+
+Scan a matrix keyboard with an API modelled after the keypad module
+
+
+* Author(s): Neradoc
+
+Implementation Notes
+--------------------
+
+**Hardware:**
+
+.. todo:: Add links to any specific hardware product page(s), or category page(s).
+  Use unordered list & hyperlink rST inline format: "* `Link Text <url>`_"
+
+**Software and Dependencies:**
+
+* Adafruit CircuitPython firmware for the supported boards:
+  https://circuitpython.org/downloads
+
+.. todo:: Uncomment or remove the Bus Device and/or the Register library dependencies
+  based on the library's use of either.
+
+# * Adafruit's Bus Device library: https://github.com/adafruit/Adafruit_CircuitPython_BusDevice
+# * Adafruit's Register library: https://github.com/adafruit/Adafruit_CircuitPython_Register
 """
+
 from digitalio import DigitalInOut, Pull
 from supervisor import ticks_ms
+
+__version__ = "0.0.0-auto.0"
+__repo__ = "https://github.com/Neradoc/CircuitPython_mcp23017_scanner.git"
 
 class Event:
     """
@@ -14,8 +46,6 @@ class Event:
     :param int timestamp: The time in milliseconds that the keypress occurred in the
                           `supervisor.ticks_ms` time system.  If specified as None,
                           the current value of `supervisor.ticks_ms` is used.
-
-    
     """
     def __init__(self, key, pressed, timestamp=None):
         self.key_number = key
