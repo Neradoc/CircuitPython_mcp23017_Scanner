@@ -16,7 +16,7 @@ profiler = Profiler(100)
 
 while True:
 	with profiler:
-		scanner.update_queue()
+		scanner.update()
 		profiler.newline = len(scanner.events)
 
 	while event := scanner.events.get():
