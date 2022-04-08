@@ -34,17 +34,19 @@ except ImportError:
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/Neradoc/CircuitPython_mcp23017_scanner.git"
 
+
 class Event:
     """
     A key transition event.
-    
+
     :param int key_number: the key number
     :param bool pressed: ``True`` if the key was pressed; ``False`` if it was released.
     :param int timestamp: The time in milliseconds that the keypress occurred in the
                           `supervisor.ticks_ms` time system.  If specified as None,
                           the current value of `supervisor.ticks_ms` is used.
     """
-    def __init__(self, key: int, pressed: bool, timestamp: int=None):
+
+    def __init__(self, key: int, pressed: bool, timestamp: int = None):
         self.key_number = key
         """The key number."""
         self.timestamp = timestamp or ticks_ms()
@@ -62,26 +64,21 @@ class Event:
     def __eq__(self, other: object) -> bool:
         """Two Event objects are equal if their key_number and pressed/released values
         are equal. Note that this does not compare the event timestamps."""
-        return (
-            self.key_number == other.key_number
-            and self.pressed == other.pressed
-        )
+        return self.key_number == other.key_number and self.pressed == other.pressed
 
     def __hash__(self) -> int:
         """Returns a hash for the Event, so it can be used in dictionaries, etc..
         Note that as events with different timestamps compare equal,
         they also hash to the same value."""
-        return (
-            self.key_number << 1
-            + int(self.pressed)
-        )
+        return self.key_number << 1 + int(self.pressed)
 
 
 class EventQueue:
     """
     A queue of Event objects, filled by a scanner.
     """
-    def __init__(self): # , max_events=64):
+
+    def __init__(self):  # , max_events=64):
         self._outq = []
         self._inq = []
 
@@ -114,8 +111,8 @@ class EventQueue:
         ev = self.get()
         if ev:
             event.key_number = ev.key_number
-            event.timestamp  = ev.timestamp
-            event.pressed    = ev.pressed
+            event.timestamp = ev.timestamp
+            event.pressed = ev.pressed
             return True
         return False
 
@@ -144,7 +141,14 @@ class McpMatrixScanner:
     Columns are on port A and inputs.
     Rows are on port B and outputs.
     """
-    def __init__(self, mcp: any, row_pins: Iterable[int], column_pins: Iterable[int], irq: Optional[Pin]=None):
+
+    def __init__(
+        self,
+        mcp: any,
+        row_pins: Iterable[int],
+        column_pins: Iterable[int],
+        irq: Optional[Pin] = None,
+    ):
         self._key_count = len(column_pins) * len(row_pins)
         self.columns = column_pins
         self.rows = row_pins
@@ -244,4 +248,3 @@ class McpMatrixScanner:
     def __exit__(self) -> None:
         """Automatically deinitializes when exiting a context."""
         self.deinit()
-
