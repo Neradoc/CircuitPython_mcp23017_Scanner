@@ -12,7 +12,9 @@ COLUMNS = [0, 1, 2, 3, 4]
 # MCP23017 port B pins for rows
 ROWS = [0, 1, 2, 3, 4, 5]
 
-mcp = MCP23017(board.I2C())
+i2c = busio.I2C(scl=board.SCL, sda=board.SDA, frequency=400_000)
+
+mcp = MCP23017(i2c)
 scanner = McpMatrixScanner(mcp, ROWS, COLUMNS, irq=board.D5)  # irq is optional
 
 # this is profiling code, remove.
@@ -21,9 +23,8 @@ from profiler import Profiler
 profiler = Profiler(100)
 
 while True:
-    with profiler:
+    with profiler.section(scanner.events):
         scanner.update()
-        profiler.newline = len(scanner.events)
 
     while event := scanner.events.get():
         key = scanner.key_number_to_row_column(event.key_number)

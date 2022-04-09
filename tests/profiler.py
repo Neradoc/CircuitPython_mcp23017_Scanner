@@ -29,6 +29,10 @@ class Profiler:
         if bool(newline):
             print("")
 
+    def section(self, newline):
+        self.newline = newline
+        return self
+
     def __enter__(self):
         self.t0 = ticks_ms()
         return self
