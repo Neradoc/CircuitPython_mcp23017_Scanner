@@ -7,6 +7,7 @@ import board
 import busio
 from adafruit_mcp230xx.mcp23017 import MCP23017
 from mcp23017_scanner import McpMatrixScanner
+from profiler import Profiler
 
 # MCP23017 port A pins for columns
 COLUMNS = [0, 1, 2, 3, 4]
@@ -17,9 +18,6 @@ i2c = busio.I2C(scl=board.SCL, sda=board.SDA, frequency=400_000)
 
 mcp = MCP23017(i2c)
 scanner = McpMatrixScanner(mcp, ROWS, COLUMNS, irq=board.D5)  # irq is optional
-
-# this is profiling code, remove.
-from profiler import Profiler
 
 profiler = Profiler(100)
 
