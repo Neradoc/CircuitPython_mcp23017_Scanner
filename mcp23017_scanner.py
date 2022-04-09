@@ -246,6 +246,6 @@ class McpMatrixScanner:
         """No-op used by Context Managers."""
         return self
 
-    def __exit__(self, _, _, _) -> None:
+    def __exit__(self, type_er, value, traceback) -> None:
         """Automatically deinitializes when exiting a context."""
         self.deinit()
