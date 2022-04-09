@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Unlicense
 
 import board
+import busio
 from adafruit_mcp230xx.mcp23017 import MCP23017
 from mcp23017_scanner import McpMatrixScanner
 

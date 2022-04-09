@@ -11,16 +11,15 @@ class Profiler:
         self.samples = sample_size
         self.times = [0] * sample_size
         self.index_times = 0
-        self.t0 = 0
-        self.t1 = 0
+        self.time_start = 0
         self.newline = False
 
     def start(self):
-        self.t0 = ticks_ms()
+        self.time_start = ticks_ms()
 
     def profile(self, newline=False):
-        self.t1 = ticks_ms()
-        self.times[self.index_times % self.samples] = self.t1 - self.t0
+        time_end = ticks_ms()
+        self.times[self.index_times % self.samples] = time_end - self.time_start
         self.index_times += 1
         average = sum(self.times[: self.index_times + 1]) / min(
             self.index_times, self.samples
@@ -34,8 +33,8 @@ class Profiler:
         return self
 
     def __enter__(self):
-        self.t0 = ticks_ms()
+        self.time_start = ticks_ms()
         return self
 
-    def __exit__(self, _, _, _):
+    def __exit__(self, type_er, value, traceback):
         self.profile(self.newline)
