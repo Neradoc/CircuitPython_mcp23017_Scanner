@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Unlicense
 
 from supervisor import ticks_ms
+from adafruit_ticks import ticks_diff
 
 
 class Profiler:
@@ -19,7 +20,9 @@ class Profiler:
 
     def profile(self, newline=False):
         time_end = ticks_ms()
-        self.times[self.index_times % self.samples] = time_end - self.time_start
+        self.times[self.index_times % self.samples] = ticks_diff(
+            time_end, self.time_start
+        )
         self.index_times += 1
         average = sum(self.times[: self.index_times + 1]) / min(
             self.index_times, self.samples
