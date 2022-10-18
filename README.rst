@@ -21,7 +21,7 @@ Introduction
     :target: https://github.com/psf/black
     :alt: Code Style: Black
 
-Scan a matrix keyboard with an API modelled after the keypad module.
+Scan a keyboard with a MCP23017 using an API modelled after the keypad module.
 
 
 Dependencies
