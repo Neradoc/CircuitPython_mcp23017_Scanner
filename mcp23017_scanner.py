@@ -136,8 +136,72 @@ class EventQueue:
         return len(self._outq) + len(self._inq)
 
 
-class McpMatrixScanner:
+class McpScanner:
+
+    def __init__(self,
+        mcp: any,
+        irq: Optional[Pin] = None,
+    ):
+        self.mcp = mcp
+        self.keys_state = set()
+        self.events = EventQueue()
+        self.irq = None
+        if irq:
+            self.irq = DigitalInOut(irq)
+            self.irq.switch_to_input(Pull.UP)
+
+    @property
+    def key_count(self) -> int:
+        """The number of keys in the scanner."""
+        return self._key_count
+
+    def update(self) -> None:
+        """
+        Run the scan and create events in the event queue.
+        """
+        timestamp = ticks_ms()
+        # scan the matrix, find Neo
+        current_state = self._scan_pins()
+        # use set algebra to find released and pressed keys
+        released_keys = self.keys_state - current_state
+        pressed_keys = current_state - self.keys_state
+        # create the events into the queue
+        for key in released_keys:
+            self.events.append(Event(key, False, timestamp))
+        for key in pressed_keys:
+            self.events.append(Event(key, True, timestamp))
+        # end
+        self.keys_state = current_state
+
+    def reset(self) -> None:
+        """
+        Reset the internal state of the scanner to assume that all keys are now
+        released. Any key that is already pressed at the time of this call will
+        therefore cause a new key-pressed event to occur on the next scan.
+        """
+        self.events.clear()
+        self.keys_state.clear()
+
+    def deinit(self) -> None:
+        """Release the IRQ pin"""
+        if self.irq:
+            self.irq.deinit()
+            self.irq = None
+        # TODO: reset the mcp configuration
+
+    def __enter__(self) -> "McpScanner":
+        """No-op used by Context Managers."""
+        return self
+
+    def __exit__(self, type_er, value, traceback) -> None:
+        """Automatically deinitializes when exiting a context."""
+        self.deinit()
+
+
+class McpMatrixScanner(McpScanner):
     """
+    Class to scan a matrix of keys connected to the MCP chip.
+
     Columns are on port A and inputs.
     Rows are on port B and outputs.
     """
@@ -149,22 +213,17 @@ class McpMatrixScanner:
         column_pins: Iterable[int],
         irq: Optional[Pin] = None,
     ):
+        super().__init__(mcp, irq)
         self._key_count = len(column_pins) * len(row_pins)
         self.columns = column_pins
         self.rows = row_pins
-        self.mcp = mcp
-        self.keys_state = set()
-        self.events = EventQueue()
         # set port A to output (columns)
         mcp.iodira = 0x00
         # set port B to input (rows) all pull ups
         mcp.iodirb = 0xFF
         mcp.gppub = 0xFF
         # set interrupts
-        self.irq = None
         if irq:
-            self.irq = DigitalInOut(irq)
-            self.irq.switch_to_input(Pull.UP)
             # TODO: configure mcp based on row and column numbers
             #       to leave the other pins free to use ?
             mcp.interrupt_enable = 0xFF00
@@ -174,12 +233,7 @@ class McpMatrixScanner:
             mcp.io_control = 0x44  # Interrupt as open drain and mirrored
             mcp.clear_ints()
 
-    @property
-    def key_count(self) -> int:
-        """The number of keys in the scanner."""
-        return self._key_count
-
-    def _scan_matrix(self) -> Set[int]:
+    def _scan_pins(self) -> Set[int]:
         """Scan the matrix and return the list of keys down"""
         pressed = set()
         num_cols = len(self.columns)
@@ -198,24 +252,6 @@ class McpMatrixScanner:
         self.mcp.gpioa = 0xFF
         return pressed
 
-    def update(self) -> None:
-        """
-        Run the scan and create events in the event queue.
-        """
-        timestamp = ticks_ms()
-        # scan the matrix, find Neo
-        current_state = self._scan_matrix()
-        # use set algebra to find released and pressed keys
-        released_keys = self.keys_state - current_state
-        pressed_keys = current_state - self.keys_state
-        # create the events into the queue
-        for key in released_keys:
-            self.events.append(Event(key, False, timestamp))
-        for key in pressed_keys:
-            self.events.append(Event(key, True, timestamp))
-        # end
-        self.keys_state = current_state
-
     def key_number_to_row_column(self, key_number: int) -> Tuple[int]:
         """Convert key number to row, column"""
         row = key_number // len(self.columns)
@@ -226,26 +262,43 @@ class McpMatrixScanner:
         """Convert row, column to key number"""
         return row * len(self.columns) + column
 
-    def reset(self) -> None:
-        """
-        Reset the internal state of the scanner to assume that all keys are now
-        released. Any key that is already pressed at the time of this call will
-        therefore cause a new key-pressed event to occur on the next scan.
-        """
-        self.events.clear()
-        self.keys_state.clear()
 
-    def deinit(self) -> None:
-        """Release the IRQ pin"""
-        if self.irq:
-            self.irq.deinit()
-            self.irq = None
-        # TODO: reset the mcp configuration
+class McpKeysScanner(McpScanner):
+    """
+    Class to scan a key per pin of the MCP chip.
 
-    def __enter__(self) -> "McpMatrixScanner":
-        """No-op used by Context Managers."""
-        return self
+    Pins 0-7 are on port A. Pins 8-15 are on port B.
+    """
 
-    def __exit__(self, type_er, value, traceback) -> None:
-        """Automatically deinitializes when exiting a context."""
-        self.deinit()
+    def __init__(
+        self,
+        mcp: any,
+        pins: Iterable[int],
+        irq: Optional[Pin] = None,
+    ):
+        super().__init__(mcp, irq)
+        self._key_count = len(pins)
+        self.pins = pins
+        self.pin_bits = sum(1 << x for x in pins)
+        # set port A and B to input all pull ups
+        mcp.iodir = 0xFFFF & self.pin_bits
+        mcp.gppu = 0xFFFF & self.pin_bits
+        # set interrupts
+        if irq:
+            # set interrupts
+            mcp.interrupt_enable = 0xFFFF & self.pin_bits
+            mcp.default_value = 0xFFFF & self.pin_bits
+            # compare input to default value (1) or previous value (0)
+            mcp.interrupt_configuration = 0xFFFF & self.pin_bits
+            mcp.io_control = 0x44  # Interrupt as open drain and mirrored
+            mcp.clear_ints()
+
+    def _scan_pins(self) -> Set[int]:
+        """Scan the buttons and return the list of keys down"""
+        pressed = set()
+        inputs = self.mcp.gpio & self.pin_bits
+        for scan in self.pins:
+            for pin in self.pins:
+                if inputs & (1 << pin) == 0:
+                    pressed.add(pin)
+        return pressed
