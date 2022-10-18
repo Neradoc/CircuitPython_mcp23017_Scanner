@@ -11,7 +11,7 @@ from mcp23017_scanner import McpKeysScanner
 PINS = [0, 1, 2, 3, 4, 10, 11, 12, 13, 14]
 
 mcp = MCP23017(board.I2C())
-scanner = McpKeysScanner(mcp, PINS) # , irq=board.D5)
+scanner = McpKeysScanner(mcp, PINS)  # , irq=board.D5)
 
 while True:
     t0 = ticks_ms()

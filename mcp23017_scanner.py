@@ -137,11 +137,16 @@ class EventQueue:
 
 
 class McpScanner:
+    """
+    Base class for MCP scanners.
+    """
 
-    def __init__(self,
+    def __init__(
+        self,
         mcp: any,
         irq: Optional[Pin] = None,
     ):
+        self._key_count = 0
         self.mcp = mcp
         self.keys_state = set()
         self.events = EventQueue()
@@ -154,6 +159,9 @@ class McpScanner:
     def key_count(self) -> int:
         """The number of keys in the scanner."""
         return self._key_count
+
+    def _scan_pins(self) -> Set[int]:  # pylint:disable=no-self-use
+        return Set()
 
     def update(self) -> None:
         """
@@ -297,8 +305,7 @@ class McpKeysScanner(McpScanner):
         """Scan the buttons and return the list of keys down"""
         pressed = set()
         inputs = self.mcp.gpio & self.pin_bits
-        for scan in self.pins:
-            for pin in self.pins:
-                if inputs & (1 << pin) == 0:
-                    pressed.add(pin)
+        for pin in self.pins:
+            if inputs & (1 << pin) == 0:
+                pressed.add(pin)
         return pressed
