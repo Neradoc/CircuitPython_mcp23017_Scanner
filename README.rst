@@ -12,8 +12,8 @@ Introduction
     :alt: Discord
 
 
-.. image:: https://github.com/Neradoc/CircuitPython_mcp23017_scanner/workflows/Build%20CI/badge.svg
-    :target: https://github.com/Neradoc/CircuitPython_mcp23017_scanner/actions
+.. image:: https://github.com/Neradoc/circuitpython-mcp23017-scanner/workflows/Build%20CI/badge.svg
+    :target: https://github.com/Neradoc/circuitpython-mcp23017-scanner/actions
     :alt: Build Status
 
 
