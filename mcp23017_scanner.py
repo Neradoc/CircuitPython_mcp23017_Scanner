@@ -139,6 +139,10 @@ class EventQueue:
 class McpScanner:
     """
     Base class for MCP scanners.
+
+    .. property:: events
+
+        The `EventQueue` associated with this Scanner. (read-only)
     """
 
     def __init__(
@@ -157,7 +161,7 @@ class McpScanner:
 
     @property
     def key_count(self) -> int:
-        """The number of keys in the scanner."""
+        """The number of keys that are being scanned. (read-only)"""
         return self._key_count
 
     def _scan_pins(self) -> Set[int]:  # pylint:disable=no-self-use
