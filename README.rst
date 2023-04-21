@@ -2,8 +2,8 @@ Introduction
 ============
 
 
-.. image:: https://readthedocs.org/projects/CircuitPython-mcp23017-Scanner/badge/?version=latest
-    :target: https://CircuitPython-mcp23017-Scanner.readthedocs.io/
+.. image:: https://readthedocs.org/projects/mcp23017-matrix-scanner-for-circuitpython/badge/?version=latest
+    :target: https://mcp23017-matrix-scanner-for-circuitpython.readthedocs.io/
     :alt: Documentation Status
 
 
