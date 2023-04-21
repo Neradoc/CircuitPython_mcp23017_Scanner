@@ -2,8 +2,8 @@ Introduction
 ============
 
 
-.. image:: https://readthedocs.org/projects/circuitpython-mcp23017-scanner/badge/?version=latest
-    :target: https://circuitpython-mcp23017-scanner.readthedocs.io/
+.. image:: https://readthedocs.org/projects/CircuitPython_mcp23017_Scanner/badge/?version=latest
+    :target: https://CircuitPython_mcp23017_Scanner.readthedocs.io/
     :alt: Documentation Status
 
 
@@ -12,8 +12,8 @@ Introduction
     :alt: Discord
 
 
-.. image:: https://github.com/Neradoc/circuitpython-mcp23017-scanner/workflows/Build%20CI/badge.svg
-    :target: https://github.com/Neradoc/circuitpython-mcp23017-scanner/actions
+.. image:: https://github.com/Neradoc/CircuitPython_mcp23017_Scanner/workflows/Build%20CI/badge.svg
+    :target: https://github.com/Neradoc/CircuitPython_mcp23017_Scanner/actions
     :alt: Build Status
 
 
@@ -89,7 +89,7 @@ Usage Example
 
 Documentation
 =============
-API documentation for this library can be found on `Read the Docs <https://circuitpython-mcp23017-scanner.readthedocs.io/>`_.
+API documentation for this library can be found on `Read the Docs <https://CircuitPython_mcp23017_Scanner.readthedocs.io/>`_.
 
 For information on building library documentation, please check out
 `this guide <https://learn.adafruit.com/creating-and-sharing-a-circuitpython-library/sharing-our-docs-on-readthedocs#sphinx-5-1>`_.
