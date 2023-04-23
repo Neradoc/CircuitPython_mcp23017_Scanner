@@ -23,6 +23,11 @@ Introduction
 
 Scan a keyboard with a MCP23017 using an API modelled after the keypad module.
 
+With a Matrix keyboard, columns (inputs) are on port A and rows (outputs) are on port B.
+
+With direct pins buttons, both ports can be used as inputs.
+
+This cannot scan in the background, so performances are somewhat limited, depending on the needs of the application.
 
 Dependencies
 =============
