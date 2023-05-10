@@ -16,7 +16,7 @@ mcp = MCP23017(board.I2C())
 scanner = McpMatrixScanner(mcp, ROWS, COLUMNS, irq=board.D5)  # irq is optional
 
 while True:
-    t0 = ticks_ms()
+    # t0 = ticks_ms()
     scanner.update()
     while event := scanner.events.get():
         key = scanner.key_number_to_row_column(event.key_number)
